@@ -52,7 +52,7 @@ esp_netif_t *get_example_netif_from_desc(const char *desc)
     esp_netif_t *netif = NULL;
     char *expected_desc;
     asprintf(&expected_desc, "%s: %s", TAG, desc);
-    while ((netif = esp_netif_next(netif)) != NULL) {
+    while ((netif = esp_netif_next_unsafe(netif)) != NULL) {
         if (strcmp(esp_netif_get_desc(netif), expected_desc) == 0) {
             free(expected_desc);
             return netif;
@@ -277,7 +277,7 @@ esp_err_t example_connect(void)
 		esp_netif_t *netif = NULL;
 		esp_netif_ip_info_t ip;
 		for (int i = 0; i < esp_netif_get_nr_of_ifs(); ++i) {
-			netif = esp_netif_next(netif);
+			netif = esp_netif_next_unsafe(netif);
 			if (is_our_netif(TAG, netif)) {
 				ESP_LOGI(TAG, "Connected to %s", esp_netif_get_desc(netif));
 				ESP_ERROR_CHECK(esp_netif_get_ip_info(netif, &ip));
