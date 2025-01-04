@@ -69,7 +69,7 @@ esp_err_t spiffs_get_fsz(char *fname, uint32_t *len)
 	{
 		fseek(f, 0L, SEEK_END);
 		*len = ftell(f);
-		ESP_LOGI(TAG, "File size: %d", *len);
+		ESP_LOGI(TAG, "File size: %"PRIx32"", *len);
 		fclose(f);
 	}
 	else
@@ -93,12 +93,12 @@ esp_err_t spiffs_read(char *fname, uint8_t **buffer, uint32_t *len)
 	{
 		fseek(f, 0L, SEEK_END);
 		*len = ftell(f);
-		ESP_LOGI(TAG, "File size: %d", *len);
+		ESP_LOGI(TAG, "File size: %"PRIu32"", *len);
 		fseek(f, 0L, SEEK_SET);
 		*buffer = malloc(*len);
 		if(*buffer)
 		{
-			ESP_LOGI(TAG, "Reading %d from file %s", *len, fname);
+			ESP_LOGI(TAG, "Reading %"PRIu32" from file %s", *len, fname);
 			
 			/* get data */
 			if((act = fread(*buffer, 1, *len, f)) != *len)
@@ -152,7 +152,7 @@ esp_err_t spiffs_write(char *fname, uint8_t *buffer, uint32_t len)
     f = fopen(fname, "wb");
     if(f != NULL)
 	{
-		ESP_LOGI(TAG, "Writing %d to file %s ", len, fname);
+		ESP_LOGI(TAG, "Writing %"PRIu32" to file %s ", len, fname);
 		if((act = fwrite(buffer, 1, len, f)) != len)
 		{
 			ESP_LOGE(TAG, "Failed writing - actual = %d", act);

@@ -35,7 +35,7 @@ static const char* TAG = "ice";
 static spi_device_handle_t spi;
 
 /* resource locking */
-xSemaphoreHandle ice_mutex;
+SemaphoreHandle_t ice_mutex = NULL;
 
 /*
  * init the FPGA interface
@@ -59,8 +59,10 @@ void ICE_Init(void)
     };
 	
 	/* create the mutex for access to the FPGA port */
-	vSemaphoreCreateBinary(ice_mutex);
-	
+	ice_mutex = xSemaphoreCreateBinary();
+	if(ice_mutex == NULL)
+		ESP_LOGE(TAG, "Failed to create mutex!");
+
     /* Initialize the SPI bus */
     ESP_LOGI(TAG, "Initialize SPI");
 	gpio_reset_pin(ICE_SPI_MISO_PIN);

@@ -109,7 +109,7 @@ void app_main(void)
 					uint32_t Addr;
 					act = fread(&Addr, 1, sizeof(uint32_t), f);
 					sz -= 4;
-					ESP_LOGI(TAG, "PSRAM write: Addr 0x%08X, Len 0x%08X", Addr, sz);
+					ESP_LOGI(TAG, "PSRAM write: Addr 0x%08"PRIx32", Len 0x%08"PRIx32"", Addr, sz);
 
 					/* read from file and send to PSRAM */
 					esp_err_t err = ESP_OK;
@@ -126,7 +126,7 @@ void app_main(void)
 						else
 						{
 							ICE_PSRAM_Write(Addr, buffer, rsz);
-							ESP_LOGI(TAG, "  chunk @ Addr 0x%08X, Len 0x%08X", Addr, rsz);
+							ESP_LOGI(TAG, "  chunk @ Addr 0x%08"PRIx32", Len 0x%08X", Addr, rsz);
 						}
 						sz -= rsz;
 						Addr += rsz;
@@ -170,7 +170,7 @@ void app_main(void)
 		ESP_LOGE(TAG, "WiFi Init Failed");
 #endif
 	
-	ESP_LOGI(TAG, "free heap: %d",esp_get_free_heap_size());
+	ESP_LOGI(TAG, "free heap: %"PRIu32"",esp_get_free_heap_size());
 	
 #if 1
 	/* start up USB/serial command handler */
@@ -181,7 +181,7 @@ void app_main(void)
 #endif
 	
 	/* wait here forever and blink */
-    ESP_LOGI(TAG, "Looping...", btime);
+    ESP_LOGI(TAG, "Looping...");
 	gpio_set_direction(LED_PIN, GPIO_MODE_OUTPUT);
 	uint8_t i = 0;
 	while(1)

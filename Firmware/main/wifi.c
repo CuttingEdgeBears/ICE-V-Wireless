@@ -15,11 +15,12 @@
 #include "lwip/sys.h"
 #include "lwip/sockets.h"
 #include "lwip/netdb.h"
-#include "phy.h"
+//#include "phy.h"
 #include "socket.h"
 #include "mdns.h"
 #include "esp_idf_version.h"
 #include "uart2.h"
+#include "freertos/semphr.h"
 
 static const char *TAG = "wifi";
 #define DEFAULT_WIFI_SSID "MY_SSID"
@@ -29,15 +30,15 @@ static const char *TAG = "wifi";
 /* Basic WiFi connection                                                      */
 /******************************************************************************/
 static int s_active_interfaces = 0;
-static xSemaphoreHandle s_semph_get_ip_addrs;
+static SemaphoreHandle_t s_semph_get_ip_addrs;
 static esp_netif_t *s_example_esp_netif = NULL;
 
 char wifi_ip_addr[32];
 
-#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 4, 2)
+//#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 4, 2)
 // there's an include for this in V4.4.2 and beyond
-extern void phy_bbpll_en_usb(bool en);
-#endif
+//extern void phy_bbpll_en_usb(bool en);
+//#endif
 
 /* stuff that's usually in the menuconfig */
 #define CONFIG_EXAMPLE_WIFI_SCAN_RSSI_THRESHOLD -127
@@ -188,8 +189,8 @@ static esp_netif_t *wifi_start(void)
 	}
 	
 	/* spritetm's workaround for auto USB disable - does this work? */
-	ESP_LOGI(TAG, "Preventing USB disable");
-	phy_bbpll_en_usb(true);
+	//ESP_LOGI(TAG, "Preventing USB disable");
+	//phy_bbpll_en_usb(true);
 	
 	/* only attempt connect if not default credentials */
     if(strncmp((char *)wifi_config.sta.ssid, DEFAULT_WIFI_SSID, 32) && 

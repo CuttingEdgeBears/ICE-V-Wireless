@@ -8,8 +8,9 @@
 
 #include "main.h"
 #include "esp_event.h"
+#include "freertos/semphr.h"
 
-extern xSemaphoreHandle ice_mutex;
+extern SemaphoreHandle_t ice_mutex;
 
 void ICE_Init(void);
 uint8_t ICE_FPGA_Config(uint8_t *bitmap, uint32_t size);

@@ -18,7 +18,7 @@
 #include "rom/crc.h"
 #include "ice.h"
 #include "spiffs.h"
-#include "phy.h"
+//#include "phy.h"
 #include "adc_c3.h"
 
 static const char *TAG = "socket";
@@ -64,7 +64,7 @@ static void handle_message(const int sock, char *err, char cmd, char *buffer, in
 	{
 		/* write block of data to PSRAM via SPI pass-thru */
 		uint32_t Addr = *((uint32_t *)buffer);
-		ESP_LOGI(TAG, "PSRAM write: Addr 0x%08X, Len 0x%08X", Addr, txsz-4);
+		ESP_LOGI(TAG, "PSRAM write: Addr 0x%08"PRIx32", Len 0x%08X", Addr, txsz-4);
 		ICE_PSRAM_Write(Addr, (uint8_t *)buffer+4, txsz-4);
 	}
 	else if(cmd == 0xb)
@@ -75,7 +75,7 @@ static void handle_message(const int sock, char *err, char cmd, char *buffer, in
 #define MAX_PSRAM_RD 128		
 		uint8_t psram_rdbuf[MAX_PSRAM_RD];
 		
-		ESP_LOGI(TAG, "PSRAM read: Addr 0x%08X, Len 0x%08X", Addr, psram_rdsz);
+		ESP_LOGI(TAG, "PSRAM read: Addr 0x%08"PRIx32", Len 0x%08"PRIx32"", Addr, psram_rdsz);
 		
 		/* Send error status */
 		int written;
@@ -118,21 +118,21 @@ static void handle_message(const int sock, char *err, char cmd, char *buffer, in
         /* Read SPI register */
 		uint8_t Reg = *(uint32_t *)buffer & 0x7f;
 		ICE_FPGA_Serial_Read(Reg, &Data);
-		ESP_LOGI(TAG, "Reg read %d = 0x%08X", *(uint32_t *)buffer, Data);
+		ESP_LOGI(TAG, "Reg read %"PRIu32" = 0x%08"PRIx32"", *(uint32_t *)buffer, Data);
 	}
 	else if(cmd == 1)
 	{
         /* Write SPI register */
 		uint8_t Reg = *(uint32_t *)buffer & 0x7f;
 		Data = *(uint32_t *)&buffer[4];
-		ESP_LOGI(TAG, "Reg write %d = %d", Reg, Data);
+		ESP_LOGI(TAG, "Reg write %d = %"PRIu32"", Reg, Data);
 		ICE_FPGA_Serial_Write(Reg, Data);
 	}
 	else if(cmd == 2)
 	{
         /* Report Vbat */
         Data = 2*(uint32_t)adc_c3_get();
-		ESP_LOGI(TAG, "Vbat = %d mV", Data);
+		ESP_LOGI(TAG, "Vbat = %"PRIu32" mV", Data);
 	}
 	else if(cmd == 5)
 	{
@@ -154,7 +154,7 @@ static void handle_message(const int sock, char *err, char cmd, char *buffer, in
 	{
         /* Load FPGA configuration */
 		uint8_t Reg = *(uint32_t *)buffer & 0x1;
-		ESP_LOGI(TAG, "Reg read %d = 0x%08X", *(uint32_t *)buffer, Data);
+		ESP_LOGI(TAG, "Reg read %"PRIu32" = 0x%08"PRIx32"", *(uint32_t *)buffer, Data);
 		const char *file = (Reg==0) ? cfg_file : spipass_file;
 		load_fpga(file);
 	}
@@ -436,7 +436,7 @@ static void do_getmsg(const int sock)
 								{
 									/* compute CRC32 to match linux crc32 cmd */
 									uint32_t crc = crc32_le(0, (uint8_t *)filebuffer, txsz);
-									ESP_LOGI(TAG, "State 0: Done - Received %d, CRC32 = 0x%08X", txsz, crc);
+									ESP_LOGI(TAG, "State 0: Done - Received %d, CRC32 = 0x%08"PRIx32"", txsz, crc);
 									handle_message(sock, &err, cmd, filebuffer, txsz);
 									
 									/* free the buffer */
@@ -492,7 +492,7 @@ static void do_getmsg(const int sock)
 							{
                                 /* compute CRC32 to match linux crc32 cmd */
                                 uint32_t crc = crc32_le(0, (uint8_t *)filebuffer, txsz);
-								ESP_LOGI(TAG, "State 1: Done - Received %d, CRC32 = 0x%08X", txsz, crc);
+								ESP_LOGI(TAG, "State 1: Done - Received %d, CRC32 = 0x%08"PRIx32"", txsz, crc);
 								
 								/* process it */
 								handle_message(sock, &err, cmd, filebuffer, txsz);
@@ -511,7 +511,7 @@ static void do_getmsg(const int sock)
 							/* check for errors */
 							if(rxleft)
 							{
-								ESP_LOGW(TAG, "State 1: Received data past end", rxleft);
+								ESP_LOGW(TAG, "State 1: Received data past end");
 							}
 						}
 					}
@@ -523,7 +523,7 @@ static void do_getmsg(const int sock)
 					
 				case 2:
 					/* still getting data */
-					ESP_LOGW(TAG, "State 2 - Received data past end", rxleft);
+					ESP_LOGW(TAG, "State 2 - Received data past end");
 					break;
 			}
         }
