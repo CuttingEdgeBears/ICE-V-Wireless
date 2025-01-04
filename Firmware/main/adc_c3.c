@@ -1,17 +1,20 @@
 /*
  * adc_c3.c - ADC driver for ESP32C3
  * 05-18-22 E. Brombaugh
+ * 01-05-25 E. Brombaugh - converted to new ADC API
  */
 #include "adc_c3.h"
-#include "driver/adc.h"
-#include "esp_adc_cal.h"
+#include "esp_adc/adc_oneshot.h"
+#include "esp_adc/adc_cali.h"
+#include "esp_adc/adc_cali_scheme.h"
 
-#define ADC_C3_CHL ADC1_CHANNEL_3
-#define ADC_EXAMPLE_CALI_SCHEME     ESP_ADC_CAL_VAL_EFUSE_TP
-#define ADC_EXAMPLE_ATTEN           ADC_ATTEN_DB_11
+#define ADC_C3_UNIT ADC_UNIT_1
+#define ADC_C3_CHL ADC_CHANNEL_3
+#define ADC_C3_ATTEN ADC_ATTEN_DB_12
 
 static bool adc_c3_cali_enable;
-static esp_adc_cal_characteristics_t adc1_chars;
+static adc_cali_handle_t adc1_cali_handle = NULL;
+static adc_oneshot_unit_handle_t adc1_handle;
 static const char* TAG = "adc_c3";
 
 /*
@@ -22,17 +25,22 @@ static bool adc_calibration_init(void)
     esp_err_t ret;
     bool cali_enable = false;
 
-    ret = esp_adc_cal_check_efuse(ADC_EXAMPLE_CALI_SCHEME);
-    if (ret == ESP_ERR_NOT_SUPPORTED) {
-        ESP_LOGW(TAG, "Calibration scheme not supported, skip software calibration");
-    } else if (ret == ESP_ERR_INVALID_VERSION) {
-        ESP_LOGW(TAG, "eFuse not burnt, skip software calibration");
-    } else if (ret == ESP_OK) {
-        cali_enable = true;
-        esp_adc_cal_characterize(ADC_UNIT_1, ADC_EXAMPLE_ATTEN, ADC_WIDTH_BIT_DEFAULT, 0, &adc1_chars);
-    } else {
-        ESP_LOGE(TAG, "Invalid arg");
-    }
+	ESP_LOGI(TAG, "calibration scheme version is %s", "Curve Fitting");
+	adc_cali_curve_fitting_config_t cali_config = {
+		.unit_id = ADC_C3_UNIT,
+		.chan = ADC_C3_CHL,
+		.atten = ADC_C3_ATTEN,
+		.bitwidth = ADC_BITWIDTH_DEFAULT,
+	};
+	ret = adc_cali_create_scheme_curve_fitting(&cali_config, &adc1_cali_handle);
+	if (ret != ESP_ERR_NOT_SUPPORTED)
+	{
+		cali_enable = true;
+	}
+	else
+	{
+		ESP_LOGW(TAG, "Calibration scheme not supported, skip software calibration");
+	}
 
     return cali_enable;
 }
@@ -42,10 +50,20 @@ static bool adc_calibration_init(void)
  */
 esp_err_t adc_c3_init(void)
 {
-    adc_c3_cali_enable = adc_calibration_init();
+	/* init ADC 1 chl 3 */
+    adc_oneshot_unit_init_cfg_t init_config1 = {
+        .unit_id = ADC_C3_UNIT,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &adc1_handle));
 
-    ESP_ERROR_CHECK(adc1_config_width(ADC_WIDTH_BIT_DEFAULT));
-    ESP_ERROR_CHECK(adc1_config_channel_atten(ADC_C3_CHL, ADC_EXAMPLE_ATTEN));
+    //-------------ADC1 Config---------------//
+    adc_oneshot_chan_cfg_t config = {
+        .bitwidth = ADC_BITWIDTH_DEFAULT,
+        .atten = ADC_C3_ATTEN,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, ADC_C3_CHL, &config));
+
+    adc_c3_cali_enable = adc_calibration_init();
 
     return 0;
 }
@@ -55,10 +73,11 @@ esp_err_t adc_c3_init(void)
  */
 int32_t adc_c3_get(void)
 {
-    int32_t result = adc1_get_raw(ADC_C3_CHL);
+    int result;
+	ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, ADC_C3_CHL, &result));
 
     if (adc_c3_cali_enable) {
-        result = esp_adc_cal_raw_to_voltage(result, &adc1_chars);
+		ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, result, &result));
     }
     return result;
 }
