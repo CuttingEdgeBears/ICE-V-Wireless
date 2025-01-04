@@ -62,7 +62,14 @@ void ICE_Init(void)
 	ice_mutex = xSemaphoreCreateBinary();
 	if(ice_mutex == NULL)
 		ESP_LOGE(TAG, "Failed to create mutex!");
-
+	else
+	{
+		if(xSemaphoreGive(ice_mutex) != pdTRUE)
+			ESP_LOGE(TAG, "Created mutex but could not give!");
+		else
+			ESP_LOGI(TAG, "Mutex created and given.");
+	}
+	
     /* Initialize the SPI bus */
     ESP_LOGI(TAG, "Initialize SPI");
 	gpio_reset_pin(ICE_SPI_MISO_PIN);
