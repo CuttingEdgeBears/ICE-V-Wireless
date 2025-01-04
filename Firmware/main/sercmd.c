@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include "uart2.h"
 #include "rom/crc.h"
-#include "esp_vfs_usb_serial_jtag.h"
+#include "driver/usb_serial_jtag_vfs.h"
 #include "wifi.h"
 #include "mbedtls/base64.h"
 
@@ -295,9 +295,9 @@ void sercmd_task(void *pvParameters)
     setvbuf(stdout, NULL, _IONBF, 0);
 
     /* Disable translation */
-	esp_vfs_dev_usb_serial_jtag_set_rx_line_endings(ESP_LINE_ENDINGS_LF);
-	esp_vfs_dev_usb_serial_jtag_set_tx_line_endings(ESP_LINE_ENDINGS_LF);
-
+	usb_serial_jtag_vfs_set_rx_line_endings(ESP_LINE_ENDINGS_LF);
+	usb_serial_jtag_vfs_set_tx_line_endings(ESP_LINE_ENDINGS_LF);
+	
     /* Enable non-blocking mode on stdin and stdout */
     fcntl(fileno(stdout), F_SETFL, 0);
     fcntl(fileno(stdin), F_SETFL, 0);
