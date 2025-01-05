@@ -74,6 +74,11 @@ The [python](python) directory contains the command-line Python scripts which ar
 provided to communicate over USB and WiFi with the default ICE-V-Wireless firmware
 and support the features outlined in the Firmware section above.
 
+The [host](host) directory contains source for a C-language Linux command line
+utility that provides the same functionality as the USB python script mentioned
+above. Use this if you prefer compiled binary instead of python, or use it as the
+basis of your own customized C-based interface application.
+
 ## Getting One
 ICE-V-Wireless boards are available via the GroupGets store:
 https://store.groupgets.com/products/ice-v-wireless
