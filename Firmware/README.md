@@ -1,4 +1,4 @@
-# Firmware Version 0.3
+# Firmware Version 0.4
 
 This directory contains the ESP32 C3 firmware for the ICE-V-Wireless board. The
 default firmware supports power-on initialization of the ICE40UP5k FPGA and PSRAM, as well as USB Serial and WiFi programming of the FPGA, SPI access after configuration,
@@ -12,17 +12,13 @@ can be set via USB Serial.
 Prior to building this firmware you'll need to have a working installation of the
 Espressif ESP32 IDF toolchain. Unfortunately there are many different versions
 available and not all components and features used here are compatible across
-them all. This project was built against the V4.4.2 stable release.
-You can find it here:
+them all. This project was built against the V5.3.2 stable release.
+You can find installation instructions here:
 
-https://github.com/espressif/esp-idf
+https://docs.espressif.com/projects/esp-idf/en/v5.3.2/esp32c3/get-started/index.html
 
-Make sure you get `stable (v4.4.2)` and that you've done all the proper
-installation and setup steps.
-
-NOTE: The github CI process for this repo uses a Docker image for esp-idf that's
-provided by Espressif and appears to contain a late version of V4.4.1 that
-does work but requires some preprocessor fiddling to get full function.
+Make sure you get `stable (v5.3.2)` and that you follow the installation and setup
+steps for your operating system as described at the site link shown above.
 
 ## Building
 
@@ -44,7 +40,8 @@ spiffs_create_partition_image(storage ../spiffs FLASH_IN_PROJECT)
 
 ### How to build
 
-Use the normal IDF build command:
+Make sure you've run the ESP-IDF tool setup script and that you're in the 
+`Firmware` directory, then use the normal IDF build command:
 
 ```
 idf.py build
@@ -60,7 +57,7 @@ idf.py -p <serial device> flash
 ```
 
 where `<serial device>` is the USB serial device which is created when the board
-enumerates.
+enumerates (usually /dev/ttyACM0 on most Linux machines).
 
 ## Monitoring
 
