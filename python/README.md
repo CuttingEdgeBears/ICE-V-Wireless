@@ -1,4 +1,4 @@
-# Python Scripts For Firmware V0.3
+# Python Scripts For Firmware V0.4
 
 This directory contains the host-side Python utility scripts which are used to
 communicate with the ICE-V Wireless board over USB and WiFi. There are currently
